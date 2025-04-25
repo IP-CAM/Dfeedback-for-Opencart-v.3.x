@@ -1,0 +1,269 @@
+<div class="module-dfeedback module-dfeedback-{{ module }}"{% if attr_ID %} id="{{ attr_ID }}"{% endif %}>
+    <div class="module-dfeedback-wrap">
+        <div class="module-dfeedback-content">
+            {% if heading_title %}
+                <h2>{{ heading_title }}</h2>
+            {% endif %}
+
+            {% if description %}
+                <div class="description">{{ description }}</div>
+            {% endif %}
+
+            <div class="dfeedback-content">
+                <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module-dfeedback-{{ module }}">
+                    <div class="fields-wrap">
+                        {% for field in form %}
+                            {% if field.type == 'text' %}
+                                <div class="field">
+                                    <div class="field-wrap">
+                                        <label for="dfeedback-{{ module }}-field_{{ loop.index0 }}"{% if field.required %} class="required"{% endif %}>
+                                            <span>{{ field.name }}</span>
+                                        </label>
+                                        <input type="text" name="fields[{{ field.field_name }}]" value="" placeholder="{{ field.name }}" id="dfeedback-{{ module }}-field_{{ loop.index0 }}" class="dfeedback-field"{% if field.required %}{{ ' required' }}{% endif %}>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if field.type == 'email' %}
+                                <div class="field">
+                                    <div class="field-wrap">
+                                        <label for="dfeedback-{{ module }}-field_{{ loop.index0 }}"{% if field.required %} class="required"{% endif %}>
+                                            <span>{{ field.name }}</span>
+                                        </label>
+                                        <input type="email" name="fields[{{ field.field_name }}]" value="" placeholder="{{ field.name }}" id="dfeedback-{{ module }}-field_{{ loop.index0 }}" class="dfeedback-field"{% if field.required %}{{ ' required' }}{% endif %}>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if field.type == 'tel' %}
+                                <div class="field">
+                                    <div class="field-wrap">
+                                        <label for="dfeedback-{{ module }}-field_{{ loop.index0 }}"{% if field.required %} class="required"{% endif %}>
+                                            <span>{{ field.name }}</span>
+                                        </label>
+                                        <input type="tel" name="fields[{{ field.field_name }}]" value="" placeholder="{{ field.name }}" id="dfeedback-{{ module }}-field_{{ loop.index0 }}" class="dfeedback-field"{% if field.required %}{{ ' required' }}{% endif %}>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if field.type == 'textarea' %}
+                                <div class="field">
+                                    <div class="field-wrap">
+                                        <label for="dfeedback-{{ module }}-field_{{ loop.index0 }}"{% if field.required %} class="required"{% endif %}>
+                                            <span>{{ field.name }}</span>
+                                        </label>
+                                        <textarea name="fields[{{ field.field_name }}]" rows="5" placeholder="{{ field.name }}" id="dfeedback-{{ module }}-field_{{ loop.index0 }}" class="dfeedback-field"{% if field.required %}{{ ' required' }}{% endif %}></textarea>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if field.type == 'select' %}
+                                {% if field.select_options %}
+                                    <div class="field">
+                                        <div class="field-wrap">
+                                            <label for="dfeedback-{{ module }}-field_{{ loop.index0 }}"{% if field.required %} class="required"{% endif %}>
+                                                <span>{{ field.name }}</span>
+                                            </label>
+                                            <select name="fields[{{ field.field_name }}]" id="dfeedback-{{ module }}-field_{{ loop.index0 }}" class="dfeedback-field"{% if field.required %}{{ ' required' }}{% endif %}>
+                                                <option value="">{{ text_select }}</option>
+
+                                                {% for key, option in field.select_options %}
+                                                    <option value="{{ option }}">{{ option }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if field.type == 'checkbox' %}
+                                <div class="field">
+                                    <div class="field-wrap">
+                                        {% if field.select_options %}
+                                            <label for="dfeedback-{{ module }}-field_{{ loop.index0 }}"{% if field.required %} class="required"{% endif %}>
+                                                <span>{{ field.name }}</span>
+                                            </label>
+
+                                            {% for key, option in field.select_options %}
+                                                <div>
+                                                    <label><input type="checkbox" name="fields[{{ field.field_name }}][]" value="{{ option }}" class="dfeedback-field"> {{ option }}</label>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <label {% if field.required %}class="required"{% endif %}>
+                                                <input type="checkbox" name="fields[{{ field.field_name }}][]" value="{{ text_yes }}" class="dfeedback-field" style="vertical-align: middle;"{% if field.required %}{{ ' required' }}{% endif %}>
+                                                <span style="vertical-align: middle;">{{ field.name }}</span>
+                                            </label>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if field.type == 'radio' %}
+                                {% if field.select_options %}
+                                    <div class="field">
+                                        <div class="field-wrap">
+                                            <label for="dfeedback-{{ module }}-field_{{ loop.index0 }}"{% if field.required %} class="required"{% endif %}>
+                                                <span>{{ field.name }}</span>
+                                            </label>
+
+                                            {% for key, option in field.select_options %}
+                                                <div>
+                                                    <label><input type="radio" name="fields[{{ field.field_name }}]" value="{{ option }}" class="dfeedback-field"{% if field.required %}{{ ' required' }}{% endif %}> {{ option }}</label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if field.type == 'datetime' %}
+                                <div class="field">
+                                    <div class="field-wrap">
+                                        <label for="dfeedback-{{ module }}-field_{{ loop.index0 }}"{% if field.required %} class="required"{% endif %}>
+                                            <span>{{ field.name }}</span>
+                                        </label>
+                                        <div class="datetime">
+                                            <input type="text" name="fields[{{ field.field_name }}]" value="" data-date-format="YYYY-MM-DD HH:mm" placeholder="{{ field.name }}" id="dfeedback-{{ module }}-field_{{ loop.index0 }}" class="dfeedback-field input-datetime"{% if field.required %}{{ ' required' }}{% endif %}>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if field.type == 'date' %}
+                                <div class="field">
+                                    <div class="field-wrap">
+                                        <label for="dfeedback-{{ module }}-field_{{ loop.index0 }}"{% if field.required %} class="required"{% endif %}>
+                                            <span>{{ field.name }}</span>
+                                        </label>
+                                        <div class="date">
+                                            <input type="text" name="fields[{{ field.field_name }}]" value="" data-date-format="YYYY-MM-DD" placeholder="{{ field.name }}" id="dfeedback-{{ module }}-field_{{ loop.index0 }}" class="dfeedback-field input-date"{% if field.required %}{{ ' required' }}{% endif %}>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if field.type == 'time' %}
+                                <div class="field">
+                                    <div class="field-wrap">
+                                        <label for="dfeedback-{{ module }}-field_{{ loop.index0 }}"{% if field.required %} class="required"{% endif %}>
+                                            <span>{{ field.name }}</span>
+                                        </label>
+                                        <div class="time">
+                                            <input type="text" name="fields[{{ field.field_name }}]" value="" data-date-format="HH:mm" placeholder="{{ field.name }}" id="dfeedback-{{ module }}-field_{{ loop.index0 }}" class="dfeedback-field input-time"{% if field.required %}{{ ' required' }}{% endif %}>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="fields-hidden">
+                        <input type="hidden" name="fcode" value="{{ fcode }}">
+                    </div>
+
+                    <div class="form-captcha">
+                        {{ captcha }}
+                    </div>
+
+                    <div class="submit-wrap">
+                        <button type="submit" class="form_submit">{{ button_send }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        {% if datetimepicker %}
+            // Set locale to 'datetimepicker' script.
+            jQuery.datetimepicker.setLocale('{{ datepicker }}');
+
+            // Set 'datetimepicker' script to option 'date'.
+            $('#form-module-dfeedback-{{ module }} .input-date').datetimepicker({
+                lang: '{{ datepicker }}',
+                dayOfWeekStart: 1,
+                format: 'Y-m-d',
+                weeks: true,
+                timepicker: false
+            });
+
+            // Set 'datetimepicker' script to option 'datetime'.
+            $('#form-module-dfeedback-{{ module }} .input-datetime').datetimepicker({
+                lang: '{{ datepicker }}',
+                dayOfWeekStart: 1,
+                format: 'Y-m-d H:i',
+                weeks: true,
+                datepicker: true
+            });
+
+            // Set 'datetimepicker' script to option 'time'.
+            $('#form-module-dfeedback-{{ module }} .input-time').datetimepicker({
+                lang: '{{ datepicker }}',
+                dayOfWeekStart: 1,
+                format: 'H:i',
+                datepicker: false
+            });
+        {% endif %}
+
+        // Submit Form.
+        $('#form-module-dfeedback-{{ module }}').on('submit', function (e) {
+            e.preventDefault();
+
+            var form = $(this);
+            var action = form.attr('action');
+
+            $.ajax({
+                type: 'post',
+                url: action,
+                data: form.serialize(),
+                dataType: 'json',
+                beforeSend: function() {
+                    form.find('.field_error_general').remove();
+                    form.find('.field_error').remove();
+                    form.find('.success').remove();
+                    form.addClass('loader');
+                    form.append('<div class="loader-ring"><div></div><div></div><div></div><div></div></div>');
+                },
+                complete: function() {
+                    form.find('.loader-ring').remove();
+                    form.removeClass('loader');
+                },
+                success: function (json) {
+                    //console.log(json);
+
+                    if (json['error']) {
+                        var errorGeneral = '<div class="field_error_general">';
+
+                        if (json['error']['form']['fields']) {
+                            errorGeneral += json['error']['general'];
+
+                            for (const key in json['error']['form']['fields']) {
+                                form.find('[name^="fields[' + key + ']"]').closest('.field-wrap').after('<div class="field_error">' + json['error']['form']['fields'][key] + '</div>');
+                            }
+                        }
+
+                        if (json['error']['form']['captcha']) {
+                            if (json['error']['form']['fields']) {
+                                errorGeneral += '<br>';
+                            }
+
+                            errorGeneral += json['error']['form']['captcha'];
+                        }
+
+                        errorGeneral += '</div>';
+
+                        form.prepend(errorGeneral);
+                    }
+
+                    if (json['success']) {
+                        form.prepend('<div class="success">' + json['text_success'] + '</div>');
+                    }
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                }
+            });
+        });
+    </script>
+</div>
