@@ -42,8 +42,8 @@
     <h3>Compatibility:</h3>
     <p>
         <ul>
-            <li>OpenCart 4.x</li>
             <li>OpenCart 3.x</li>
+            <li>OpenCart 4.x</li>
             <li>ocStore 3.x</li>
         </ul>
     </p>
