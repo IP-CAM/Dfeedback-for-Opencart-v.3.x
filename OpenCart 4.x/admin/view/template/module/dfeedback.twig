@@ -1,0 +1,291 @@
+{{ header }}
+{{ column_left }}
+
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="float-end">
+                <button type="submit" form="form-module" data-bs-toggle="tooltip" title="" class="btn btn-primary" data-bs-original-title="{{ button_save }}" aria-label="{{ button_save }}"><i class="fas fa-save"></i></button>
+                <a href="{{ cancel }}" data-bs-toggle="tooltip" title="" class="btn btn-light" data-bs-original-title="{{ button_cancel }}" aria-label="{{ button_cancel }}"><i class="fas fa-reply"></i></a>
+            </div>
+
+            <h1>{{ heading_title }}</h1>
+
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-pencil-alt"></i> {{ text_edit }}</div>
+
+            <div class="card-body">
+                <form id="form-module" action="{{ action }}" method="post" data-oc-toggle="ajax">
+                    {% if error_warning %}
+                        <div class="alert alert-danger alert-dismissible">
+                            <i class="fa fa-exclamation-circle"></i>
+                            {{ error_warning }}
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        </div>
+                    {% endif %}
+
+                    <input type="hidden" name="uniqid" value="{{ uniqid }}" />
+                    <input type="hidden" name="mcode" value="{{ mcode }}" />
+
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a href="#tab-general" data-bs-toggle="tab" class="nav-link active">{{ tab_general }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#tab-fields" data-bs-toggle="tab" class="nav-link">{{ tab_fields }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#tab-settings" data-bs-toggle="tab" class="nav-link">{{ tab_settings }}</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tab-general">
+                            <div class="row mb-3 required">
+                                <label class="col-sm-2 col-form-label" for="input-name">{{ entry_name }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+                                    {% if error_name %}
+                                        <div class="text-danger">{{ error_name }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label" for="input-id">{{ entry_id }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="attr_ID" value="{{ attr_ID }}" placeholder="{{ entry_id }}" id="input-id" class="form-control" />
+                                </div>
+                            </div>
+
+                            <ul class="nav nav-tabs" id="language-general">
+                                {% for language in languages %}
+                                    <li class="nav-item">
+                                        <a href="#language-general-{{ language.language_id }}" data-bs-toggle="tab" class="nav-link{% if loop.first %} active{% endif %}">
+                                            <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+
+                            <div class="tab-content">
+                                {% for language in languages %}
+                                    <div class="tab-pane{% if loop.first %} active{% endif %}" id="language-general-{{ language.language_id }}">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-2 col-form-label" for="input-title{{ language.language_id }}">{{ entry_title }}</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" name="module_description[{{ language.language_id }}][title]" placeholder="{{ entry_title }}" id="input-title{{ language.language_id }}" value="{{ module_description[language.language_id] ? module_description[language.language_id]['title'] : '' }}" class="form-control" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <label class="col-sm-2 col-form-label" for="input-description{{ language.language_id }}">{{ entry_description }}</label>
+                                            <div class="col-sm-10">
+                                                <textarea name="module_description[{{ language.language_id }}][description]" placeholder="{{ entry_description }}" id="input-description{{ language.language_id }}"  data-oc-toggle="ckeditor" class="form-control">{{ module_description[language.language_id] ? module_description[language.language_id]['description'] : '' }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tab-fields">
+                            <ul class="nav nav-tabs" id="language-fields">
+                                {% for language in languages %}
+                                    <li class="nav-item">
+                                        <a href="#language-fields-{{ language.language_id }}" data-bs-toggle="tab" class="nav-link{% if loop.first %} active{% endif %}">
+                                            <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+
+                            <div class="tab-content">
+                                {% set form_row = 0 %}
+
+                                {% for language in languages %}
+                                    <div class="tab-pane{% if loop.first %} active{% endif %}" id="language-fields-{{ language.language_id }}">
+                                        <div class="tab-pane-wrap" style="overflow: auto;">
+                                            <table id="form-fields-{{ language.language_id }}" class="table table-striped table-bordered table-hover" style="min-width: 1000px;">
+                                                <thead>
+                                                    <tr>
+                                                        <td class="text-left required" style="width: 320px;">{{ column_name }}</td>
+                                                        <td class="text-left required" style="width: 250px;">{{ column_type }}</td>
+                                                        <td class="text-left">
+                                                            <span data-container="#form-fields-{{ language.language_id }}" data-toggle="tooltip" data-bs-toggle="tooltip" data-bs-original-title="{{ help_type_choise }}" aria-label="{{ help_type_choise }}" title="{{ help_type_choise }}">{{ column_select_opt }}</span>
+                                                        </td>
+                                                        <td class="text-left" style="width: 140px;">{{ column_required }}</td>
+                                                        <td class="text-left" style="width: 180px;">{{ column_sort_order }}</td>
+                                                        <td style="width: 70px;"></td>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    {% if form[language.language_id] %}
+                                                        {% for field in form[language.language_id] %}
+                                                            <tr id="form-fields-row-{{ form_row }}">
+                                                                <td class="text-left">
+                                                                    <input type="text" name="form[{{ language.language_id }}][{{ form_row }}][name]" value="{{ field.name }}" placeholder="{{ column_name }}" class="form-control" />
+
+                                                                    {% if error_form[language.language_id][field.field_name]['name'] %}
+                                                                        <div class="text-danger">{{ error_form[language.language_id][field.field_name]['name'] }}</div>
+                                                                    {% endif %}
+                                                                </td>
+
+                                                                <td class="text-left">
+                                                                    <select name="form[{{ language.language_id }}][{{ form_row }}][type]" class="form-select">
+                                                                        <option value="">{{ text_select }}</option>
+
+                                                                        <optgroup label="{{ text_group_basic }}">
+                                                                            <option value="text"{% if field.type == 'text' %}{{ ' selected' }}{% endif %}>{{ text_type_text }}</option>
+                                                                            <option value="textarea"{% if field.type == 'textarea' %}{{ ' selected' }}{% endif %}>{{ text_type_textarea }}</option>
+                                                                        </optgroup>
+
+                                                                        <optgroup label="{{ text_group_contact }}">
+                                                                            <option value="email"{% if field.type == 'email' %}{{ ' selected' }}{% endif %}>{{ text_type_email }}</option>
+                                                                            <option value="tel"{% if field.type == 'tel' %}{{ ' selected' }}{% endif %}>{{ text_type_tel }}</option>
+                                                                        </optgroup>
+
+                                                                        <optgroup label="{{ text_group_choose }}">
+                                                                            <option value="select"{% if field.type == 'select' %}{{ ' selected' }}{% endif %}>{{ text_type_select }}</option>
+                                                                            <option value="checkbox"{% if field.type == 'checkbox' %}{{ ' selected' }}{% endif %}>{{ text_type_checkbox }}</option>
+                                                                            <option value="radio"{% if field.type == 'radio' %}{{ ' selected' }}{% endif %}>{{ text_type_radio }}</option>
+                                                                        </optgroup>
+
+                                                                        <optgroup label="{{ text_group_datetme }}">
+                                                                            <option value="datetime"{% if field.type == 'datetime' %}{{ ' selected' }}{% endif %}>{{ text_type_datetime }}</option>
+                                                                            <option value="date"{% if field.type == 'date' %}{{ ' selected' }}{% endif %}>{{ text_type_date }}</option>
+                                                                            <option value="time"{% if field.type == 'time' %}{{ ' selected' }}{% endif %}>{{ text_type_time }}</option>
+                                                                        </optgroup>
+                                                                    </select>
+
+                                                                    {% if error_form[language.language_id][field.field_name]['type'] %}
+                                                                        <div class="text-danger">{{ error_form[language.language_id][field.field_name]['type'] }}</div>
+                                                                    {% endif %}
+                                                                </td>
+
+                                                                <td class="text-left">
+                                                                    <textarea name="form[{{ language.language_id }}][{{ form_row }}][select_options]" rows="5" placeholder="{{ column_select_opt }}" class="form-control" style="resize: vertical;">{{ field.select_options }}</textarea>
+                                                                </td>
+
+                                                                <td class="text-left">
+                                                                    <select name="form[{{ language.language_id }}][{{ form_row }}][required]" class="form-select">
+                                                                        {% if field.required %}
+                                                                            <option value="1" selected="selected">{{ text_yes }}</option>
+                                                                            <option value="0">{{ text_no }}</option>
+                                                                        {% else %}
+                                                                            <option value="1">{{ text_yes }}</option>
+                                                                            <option value="0" selected="selected">{{ text_no }}</option>
+                                                                        {% endif %}
+                                                                    </select>
+                                                                </td>
+
+                                                                <td class="text-left">
+                                                                    <input type="number" min="0" step="1" name="form[{{ language.language_id }}][{{ form_row }}][sort_order]" value="{{ field.sort_order }}" placeholder="{{ column_sort_order }}" class="form-control" />
+                                                                </td>
+
+                                                                <td class="text-center">
+                                                                    <input type="hidden" name="form[{{ language.language_id }}][{{ form_row }}][field_name]" value="{{ field.field_name }}" />
+                                                                    <button type="button" onclick="$('#form-fields-row-{{ form_row }}, .tooltip').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button>
+                                                                </td>
+                                                            </tr>
+
+                                                            {% set form_row = form_row + 1 %}
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </tbody>
+
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="5"></td>
+                                                        <td class="text-center">
+                                                            <button type="button" onclick="addField('{{ language.language_id }}');" data-toggle="tooltip" title="{{ button_field_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tab-settings">
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label" for="input-status">{{ entry_status }}</label>
+                                <div class="col-sm-10">
+                                    <select name="status" id="input-status" class="form-select">
+                                        {% if status %}
+                                            <option value="1" selected="selected">{{ text_enabled }}</option>
+                                            <option value="0">{{ text_disabled }}</option>
+                                        {% else %}
+                                            <option value="1">{{ text_enabled }}</option>
+                                            <option value="0" selected="selected">{{ text_disabled }}</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label" for="input-captcha">{{ entry_captcha }}</label>
+                                <div class="col-sm-10">
+                                    <select name="captcha" id="input-captcha" class="form-select">
+                                        <option value="">{{ text_select }}</option>
+
+                                        {% for captcha_option in captchas %}
+                                            {% if captcha_option.value == captcha %}
+                                                <option value="{{ captcha_option.value }}" selected="selected">{{ captcha_option.text }}</option>
+                                            {% else %}
+                                                <option value="{{ captcha_option.value }}">{{ captcha_option.text }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript"><!--
+        var form_row = {{ form_row }};
+
+        function addField(language_id) {
+            html  = '<tr id="form-fields-row-' + form_row + '">';
+                html += '<td class="text-left"><input type="text" name="form[' + language_id + '][' + form_row + '][name]" value="" placeholder="{{ column_title }}" class="form-control" /></td>';
+                html += '<td class="text-left"><select name="form[' + language_id + '][' + form_row + '][type]" class="form-select"><option value="">{{ text_select }}</option><optgroup label="{{ text_group_basic }}"><option value="text">{{ text_type_text }}</option><option value="textarea">{{ text_type_textarea }}</option></optgroup><optgroup label="{{ text_group_contact }}"><option value="email">{{ text_type_email }}</option><option value="tel">{{ text_type_tel }}</option></optgroup><optgroup label="{{ text_group_choose }}"><option value="select">{{ text_type_select }}</option><option value="checkbox">{{ text_type_checkbox }}</option><option value="radio">{{ text_type_radio }}</option></optgroup><optgroup label="{{ text_group_datetme }}"><option value="datetime">{{ text_type_datetime }}</option><option value="date">{{ text_type_date }}</option><option value="time">{{ text_type_time }}</option></optgroup></select></td>';
+                html += '<td class="text-left"><textarea name="form[' + language_id + '][' + form_row + '][select_options]" rows="5" placeholder="{{ column_select_opt }}" class="form-control"></textarea></td>';
+                html += '<td class="text-left"><select name="form[' + language_id + '][' + form_row + '][required]" class="form-select"><option value="1">{{ text_yes }}</option><option value="0" selected="selected">{{ text_no }}</option></select></td>';
+                html += '<td class="text-left"><input type="number" min="0" step="1" name="form[' + language_id + '][' + form_row + '][sort_order]" value="" placeholder="{{ column_sort_order }}" class="form-control" /></td>';
+                html += '<td class="text-center"><input type="hidden" name="form[' + language_id + '][' + form_row + '][field_name]" value="' + uniqid() + '' + form_row + '" /><button type="button" onclick="$(\'#form-fields-row-' + form_row  + ', .tooltip\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+            html += '</tr>';
+
+            $('#form-fields-' + language_id + ' tbody').append(html);
+
+            form_row++;
+        }
+
+        function uniqid(prefix = '', random = false) {
+            const sec = Date.now() * 1000 + Math.random() * 1000;
+            const id = sec.toString(16).replace(/\./g, '').padEnd(14, '0');
+            return `${prefix}${id}${random ? `.${Math.trunc(Math.random() * 100000000)}`:''}`;
+        };
+    //--></script>
+
+    <script type="text/javascript"><!--
+        $('textarea[data-oc-toggle=\'ckeditor\']').ckeditor();
+    //--></script>
+</div>
+
+{{ footer }}
