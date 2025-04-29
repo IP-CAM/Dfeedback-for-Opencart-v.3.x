@@ -28,6 +28,26 @@
             </li>
         </ol>
     </p>
+    <h2>Installation on OpenCart 4.x:</h2>
+    <p>
+        <ol>
+            <li>Download the archive to a convenient disk location. If the archive is not an OCMOD-extension, unpack the archive.</li>
+            <li>Open the Site Dashboard.</li>
+            <li>Through the "Navigation" menu, go to the Extensions -> Installer extensions section.
+                <ul>
+                  <li>Click the "Upload" button => Select the downloaded OCMOD-extension of the module => Open.</li>
+                  <li>Wait for the download to finish.</li>
+                  <li>Click the "Install" button.</li>
+                </ul>
+            </li>
+            <li>Through the "Navigation" menu, go to the System -> Users -> User groups -> Administrator section.
+                <ul>
+                  <li>In all blocks, check all matches starting from "extension/dfeedback ...", if exist.</li>
+                  <li>Click the "Save" button.</li>
+                </ul>
+            </li>
+        </ol>
+    </p>
     <h2>Customization:</h2>
     <p>
         <ol>
