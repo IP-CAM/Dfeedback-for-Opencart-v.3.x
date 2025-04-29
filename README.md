@@ -7,7 +7,8 @@
     <p>
         <a href="https://php.net/" rel="nofollow"><img src="https://img.shields.io/badge/php->=7.3-8892bf?style=flat-square" alt="Minimum PHP Version"></a>
         <a href="https://php.net/" rel="nofollow"><img src="https://img.shields.io/badge/release-v1.0.0-0d7fc0" alt="GitHub release"></a>
-        <a href="https://php.net/" rel="nofollow"><img src="https://img.shields.io/badge/cms-opencart 3.x-2bbdec" alt="CMS OpenCart 3.x"></a>
+        <a href="https://php.net/" rel="nofollow"><img src="https://img.shields.io/badge/cms-opencart-2bbdec" alt="CMS OpenCart"></a>
+        <a href="https://php.net/" rel="nofollow"><img src="https://img.shields.io/badge/opencart-3.x, 4.x-2bbdec" alt="CMS OpenCart 3.x, 4.x"></a>
     </p>
     <p>Feedback Form creates and displays various feedback form configurations based on standard field types. In addition, the ability to set the Form ID, enable/disable Captcha, additionally enter the title and description of the form, as well as selection options for the corresponding fields, has been added. The number of fields is unlimited. This module is a simple constructor of fields for a feedback form.</p>
     <h3>Note:</h3>
@@ -41,6 +42,7 @@
     <h3>Compatibility:</h3>
     <p>
         <ul>
+            <li>OpenCart 4.x</li>
             <li>OpenCart 3.x</li>
             <li>ocStore 3.x</li>
         </ul>
