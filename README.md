@@ -33,7 +33,7 @@
     <h3>Used fields:</h3>
     <p>
         <ul>
-            <li>Main (text, textarea);/li>
+            <li>Main (text, textarea);</li>
             <li>Contacts (email, tel);</li>
             <li>Choice (select, checkbox, radio);</li>
             <li>Date and Time (text).</li>
