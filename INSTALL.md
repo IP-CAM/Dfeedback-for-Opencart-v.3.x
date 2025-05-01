@@ -54,7 +54,7 @@
             <li>Through the "Navigation" menu, go to the Extensions -> Extensions section.
                 <ul>
                   <li>Choose the extension type -> Modules.</li>
-                  <li>Find the "Menu Editor" module and click the "Install" button.</li>
+                  <li>Find the module and click the "Install" button.</li>
                   <li>Go to the module by clicking the "Edit" button.</li>
                 </ul>
             </li>
