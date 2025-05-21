@@ -2,6 +2,7 @@
 <modification>
     <name>Feedback Form</name>
     <code>DFeedbackForm</code>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <author>D.art</author>
+    <link>https://github.com/dart-maker/dfeedback-opencart</link>
 </modification>
