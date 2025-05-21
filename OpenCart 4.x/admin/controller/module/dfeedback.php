@@ -12,6 +12,8 @@ class DFeedback extends \Opencart\System\Engine\Controller {
     private $error = array();
 
     public function index(): void {
+        $x = version_compare(VERSION, '4.0.2.0', '>=') ? '.' : '|';
+
         $this->load->language('extension/dfeedback/module/dfeedback');
 
         $this->document->setTitle($this->language->get('heading_title'));
@@ -21,8 +23,6 @@ class DFeedback extends \Opencart\System\Engine\Controller {
 
         $this->load->model('setting/module');
         $this->load->model('setting/extension');
-
-        $x = (version_compare(VERSION, '4.0.2.0', '>=')) ? '.' : '|';
 
         if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
             if (!isset($this->request->get['module_id'])) {
@@ -41,7 +41,7 @@ class DFeedback extends \Opencart\System\Engine\Controller {
 
             $this->session->data['success'] = $this->language->get('text_success');
 
-            $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
+            $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module'));
         }
 
         if (isset($this->error['warning'])) {
@@ -62,39 +62,33 @@ class DFeedback extends \Opencart\System\Engine\Controller {
             $data['error_form'] = array();
         }
 
+        $url = '';
+
+        if (isset($this->request->get['module_id'])) {
+            $url .= '&module_id=' . $this->request->get['module_id'];
+        }
+
         $data['breadcrumbs'] = array();
 
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('text_home'),
-            'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+            'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'])
         );
 
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('text_extension'),
-            'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
+            'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module')
         );
 
-        if (!isset($this->request->get['module_id'])) {
-            $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('heading_title'),
-                'href' => $this->url->link('extension/dfeedback/module/dfeedback', 'user_token=' . $this->session->data['user_token'], true)
-            );
-        } else {
-            $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('heading_title'),
-                'href' => $this->url->link('extension/dfeedback/module/dfeedback', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $this->request->get['module_id'], true)
-            );
-        }
+        $data['breadcrumbs'][] = array(
+            'text' => $this->language->get('heading_title'),
+            'href' => $this->url->link('extension/dfeedback/module/dfeedback', 'user_token=' . $this->session->data['user_token'] . $url)
+        );
 
-        if (!isset($this->request->get['module_id'])) {
-            $data['action'] = $this->url->link('extension/dfeedback/module/dfeedback' . $x . 'save', 'user_token=' . $this->session->data['user_token'], true);
-        } else {
-            $data['action'] = $this->url->link('extension/dfeedback/module/dfeedback' . $x . 'save', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $this->request->get['module_id'], true);
-        }
+        $data['action'] = $this->url->link('extension/dfeedback/module/dfeedback' . $x . 'save', 'user_token=' . $this->session->data['user_token'] . $url);
+        $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module');
 
-        $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
-
-        if (isset($this->request->get['module_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
+        if (isset($this->request->get['module_id'])) {
             $module_info = $this->model_setting_module->getModule($this->request->get['module_id']);
         }
 
@@ -193,7 +187,7 @@ class DFeedback extends \Opencart\System\Engine\Controller {
 
         $data['captchas'] = [];
 
-        // Get a list of installed captchas
+        // Get a list of installed captchas.
         $extensions = $this->model_setting_extension->getExtensionsByType('captcha');
 
         foreach ($extensions as $extension) {
@@ -236,11 +230,11 @@ class DFeedback extends \Opencart\System\Engine\Controller {
             foreach ($this->request->post['form'] as $language_id => $value) {
                 foreach ($value as $field) {
                     if ((mb_strlen($field['name']) < 3) || (mb_strlen($field['name']) > 64)) {
-                        $json['error']['form'][$language_id][$field['field_name']]['name'] = $this->language->get('error_row_name');
+                        $json['error']['form_' . $language_id . '_' . $field['field_name'] . '_name'] = $this->language->get('error_row_name');
                     }
 
                     if (empty($field['type'])) {
-                        $json['error']['form'][$language_id][$field['field_name']]['type'] = $this->language->get('error_row_type');
+                        $json['error']['form_' . $language_id . '_' . $field['field_name'] . '_type'] = $this->language->get('error_row_type');
                     }
                 }
             }
@@ -257,10 +251,14 @@ class DFeedback extends \Opencart\System\Engine\Controller {
                 $module_settings['module_id'] = $module_id;
 
                 $this->model_setting_module->editModule($module_id, $module_settings);
+
+                //$json['redirect'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module');
             } else {
                 $post = $this->request->post;
                 $post['module_id'] = $this->request->get['module_id'];
                 $this->model_setting_module->editModule($this->request->get['module_id'], $post);
+
+                //$json['redirect'] = $this->url->link('extension/dfeedback/module/dfeedback', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $this->request->get['module_id']);
             }
 
 			$json['success'] = $this->language->get('text_success');
@@ -335,17 +333,17 @@ class DFeedback extends \Opencart\System\Engine\Controller {
     *
     * @param int $length
     *
-    * @return string $random_string
+    * @return string $string
     */
-    function generateRandomString(string $length = 16): string {
+    private function generateRandomString(int $length = 16): string {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $characters_length = strlen($characters);
-        $random_string = '';
+        $string = '';
 
         for ($i = 0; $i < $length; $i++) {
-            $random_string .= $characters[random_int(0, $characters_length - 1)];
+            $string .= $characters[random_int(0, $characters_length - 1)];
         }
 
-        return $random_string;
+        return $string;
     }
 }

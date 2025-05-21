@@ -12,8 +12,15 @@ class DFeedback extends \Opencart\System\Engine\Controller {
     private $error = array();
     private $datetimepicker = false;
 
-    public function index($setting) {	
-        if (isset($setting['form'][$this->config->get('config_language_id')])) {
+    private $x = '|';
+
+    public function index(array $setting): string {
+        $view = '';
+        $language_id = $this->config->get('config_language_id');
+
+        if (isset($setting['form'][$language_id])) {
+            $this->x = version_compare(VERSION, '4.0.2.0', '>=') ? '.' : '|';
+
             $this->load->language('extension/dfeedback/module/dfeedback');
 
             $this->load->model('setting/extension');
@@ -22,9 +29,7 @@ class DFeedback extends \Opencart\System\Engine\Controller {
 
             static $module = 0;
 
-            $x = (version_compare(VERSION, '4.0.2.0', '>=')) ? '.' : '|';
-
-            $data['form'] = $setting['form'][$this->config->get('config_language_id')];
+            $data['form'] = $setting['form'][$language_id];
 
             usort($data['form'], function($a, $b){
                 return strcmp($a['sort_order'], $b['sort_order']);
@@ -39,8 +44,8 @@ class DFeedback extends \Opencart\System\Engine\Controller {
                 $this->document->addScript(HTTP_SERVER . 'extension/dfeedback/catalog/view/javascript/module-dfeedback/datetimepicker-1.3.6/jquery.datetimepicker.full.min.js');
             }
 
-            $data['heading_title'] = html_entity_decode($setting['module_description'][$this->config->get('config_language_id')]['title'], ENT_QUOTES, 'UTF-8');
-            $data['description'] = html_entity_decode($setting['module_description'][$this->config->get('config_language_id')]['description'], ENT_QUOTES, 'UTF-8');
+            $data['heading_title'] = html_entity_decode($setting['module_description'][$language_id]['title'], ENT_QUOTES, 'UTF-8');
+            $data['description'] = html_entity_decode($setting['module_description'][$language_id]['description'], ENT_QUOTES, 'UTF-8');
             $data['attr_ID'] = $setting['attr_ID'];
 
             /* Captcha */
@@ -56,29 +61,40 @@ class DFeedback extends \Opencart\System\Engine\Controller {
                 }
             }
 
-            $data['fcode'] = openssl_encrypt($setting['uniqid'] . '---' . $setting['module_id'] . '---' . $setting['mcode'] . '---' . $this->config->get('module_dfeedback_captcha_ed_ec'), 'AES-128-ECB', $this->config->get('module_dfeedback_captcha_ed_pc'));
+            $fcode  = '';
+            $fcode .= $setting['uniqid'] . '---';
+            $fcode .= $setting['module_id'] . '---';
+            $fcode .= $setting['mcode'] . '---';
+            $fcode .= $this->config->get('module_dfeedback_captcha_ed_ec');
 
-            $data['action'] = $this->url->link('extension/dfeedback/module/dfeedback' . $x . 'submit', '');
+            $data['fcode'] = openssl_encrypt($fcode, 'AES-128-ECB', $this->config->get('module_dfeedback_captcha_ed_pc'));
+
+            $data['action'] = $this->url->link('extension/dfeedback/module/dfeedback' . $this->x . 'submit', '');
 
             $data['module'] = $module++;
 
-            return $this->load->view('extension/dfeedback/module/dfeedback', $data);
-        } else {
-            return '';
+            $view = $this->load->view('extension/dfeedback/module/dfeedback', $data);
         }
+
+        return $view;
     }
 
     /**
-     * Submit Form. AJAX.
+     * Submit Form.
+     * AJAX.
      * 
-     * @return array $json
+     * @return void
      */
-    public function submit() {
+    public function submit(): void {
+        $this->x = version_compare(VERSION, '4.0.2.0', '>=') ? '.' : '|';
+
         $this->load->language('extension/dfeedback/module/dfeedback');
 
         $this->load->model('setting/module');
 
         $json = array();
+        $json['success'] = false;
+        $json['error']['general'] = $this->language->get('error_uniqid');
 
         if (isset($this->request->post['fcode'])) {
             $fcode = openssl_decrypt($this->request->post['fcode'], 'AES-128-ECB', $this->config->get('module_dfeedback_captcha_ed_pc'));
@@ -99,32 +115,30 @@ class DFeedback extends \Opencart\System\Engine\Controller {
                 if (count($uniq_keys) == 4) {
                     $setting = $this->model_setting_module->getModule((int)$uniq_keys[1]);
 
-                    if (!empty($setting) && isset($setting['uniqid']) && ($setting['uniqid'] == $uniq_keys[0]) && isset($setting['mcode']) && ($setting['mcode'] == $uniq_keys[2]) && ($uniq_keys[3] == $this->config->get('module_dfeedback_captcha_ed_ec'))) {
-                        if ($this->validate($fields, $setting)) {
-                            $this->sendMail($fields, $setting);
+                    if (!empty($setting) && isset($setting['uniqid']) && 
+                        ($setting['uniqid'] == $uniq_keys[0]) && 
+                        isset($setting['mcode']) && ($setting['mcode'] == $uniq_keys[2]) && 
+                        ($uniq_keys[3] == $this->config->get('module_dfeedback_captcha_ed_ec'))) {
+                            if ($this->validate($fields, $setting)) {
+                                $this->sendMail($fields, $setting);
 
-                            $json['success'] = true;
-                            $json['text_success'] = $this->language->get('text_success');
-                        } else {
-                            $json['success'] = false;
-                            $json['error'] = $this->error;
-                            $json['error']['general'] = $this->language->get('error_fields');
-                        }
-                    } else {
-                        $json['success'] = false;
-                        $json['error']['general'] = $this->language->get('error_uniqid');
+                                $json['success'] = true;
+                                $json['text_success'] = $this->language->get('text_success');
+                            } else {
+                                $json['error'] = $this->error;
+
+                                if (isset($json['error']['form']['fields'])) {
+                                    $json['error']['fields'] = $this->language->get('error_fields');
+                                }
+                            }
+
+                            $json['error']['general'] = '';
                     }
-                } else {
-                    $json['success'] = false;
-                    $json['error']['general'] = $this->language->get('error_uniqid');
                 }
             } else {
-                $json['success'] = false;
-                $json['error']['general'] = $this->language->get('error_data');
+                $json['error']['general'] = '';
+                $json['error']['fields'] = $this->language->get('error_fields');
             }
-        } else {
-            $json['success'] = false;
-            $json['error']['general'] = $this->language->get('error_uniqid');
         }
 
         $this->response->addHeader('Content-Type: application/json');
@@ -138,7 +152,7 @@ class DFeedback extends \Opencart\System\Engine\Controller {
      * 
      * @return array $form
      */
-    private function changeFormData($form) {
+    private function changeFormData(array $form): array {
         $form_length = count($form);
         $select_options_key = 0;
 
@@ -196,7 +210,7 @@ class DFeedback extends \Opencart\System\Engine\Controller {
      * 
      * @return void
      */
-    private function sendMail($fields, $setting) {
+    private function sendMail(array $fields, array $setting): void {
 		if ($this->config->get('config_mail_engine')) {
             if (version_compare(VERSION, '4.0.2.0', '>=')) {
                 $mail_option = [
@@ -236,10 +250,12 @@ class DFeedback extends \Opencart\System\Engine\Controller {
      * 
      * @return string $html
      */
-    private function htmlMail($fields, $setting) {
+    private function htmlMail(array $fields, array $setting): string {
+        $language_id = $this->config->get('config_language_id');
+
         $html = '<div>';
 
-        foreach($setting['form'][$this->config->get('config_language_id')] as $field_setting) {
+        foreach($setting['form'][$language_id] as $field_setting) {
             foreach($fields as $key_post => $field_post) {
                 if ($field_setting['field_name'] == $key_post) {
                     switch ($field_setting['type']) {
@@ -287,16 +303,17 @@ class DFeedback extends \Opencart\System\Engine\Controller {
      * @param array $fields
      * @param array $setting
      * 
-     * @return bool $this->error
+     * @return bool
      */
-    protected function validate($fields, $setting) {
+    protected function validate(array $fields, array $setting): bool {
         $this->load->model('setting/extension');
 
-        $x = (version_compare(VERSION, '4.0.2.0', '>=')) ? '.' : '|';
+        $language_id = $this->config->get('config_language_id');
 
-        foreach($setting['form'][$this->config->get('config_language_id')] as $field_setting) {
-            if ($field_setting['type'] == 'checkbox' && $field_setting['required'] && !isset($fields[$field_setting['field_name']])) {
-                $this->error['form']['fields'][$field_setting['field_name']] = $this->language->get('error_field');
+        foreach($setting['form'][$language_id] as $field_setting) {
+            if (($field_setting['type'] == 'checkbox' || $field_setting['type'] == 'radio') && 
+                $field_setting['required'] && !isset($fields[$field_setting['field_name']])) {
+                    $this->error['form']['fields'][$field_setting['field_name']] = $this->language->get('error_field');
             } else {
                 foreach($fields as $key_post => $field_post) {
                     if ($field_setting['field_name'] == $key_post) {
@@ -359,19 +376,18 @@ class DFeedback extends \Opencart\System\Engine\Controller {
         }
 
         /* Captcha */
+        if ($setting['captcha']) {
+            $extension_info = $this->model_setting_extension->getExtensionByCode('captcha', $setting['captcha']);
 
-        $extension_info = $this->model_setting_extension->getExtensionByCode('captcha', $setting['captcha']);
-
-        if ($extension_info) {
-            if ($this->config->get('captcha_' . $setting['captcha'] . '_status')) {
-                $captcha = $this->load->controller('extension/' . $extension_info['extension'] . '/captcha/' . $extension_info['code'] . $x . 'validate');
+            if ($extension_info && $this->config->get('captcha_' . $setting['captcha'] . '_status')) {
+                $captcha = $this->load->controller('extension/' . $extension_info['extension'] . '/captcha/' . $extension_info['code'] . $this->x . 'validate');
 
                 if ($captcha) {
                     $this->error['form']['captcha'] = $captcha;
                 }
+            } else {
+                $this->error['form']['captcha'] = 'Error: Captcha is not valid!';
             }
-        } else {
-            $this->error['form']['captcha'] = 'Error: Captcha is not valid!';
         }
 
         return !$this->error;

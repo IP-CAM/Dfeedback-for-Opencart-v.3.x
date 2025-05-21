@@ -54,6 +54,8 @@
                                 <label class="col-sm-2 col-form-label" for="input-name">{{ entry_name }}</label>
                                 <div class="col-sm-10">
                                     <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+                                    <div id="error-name" class="invalid-feedback"></div>
+
                                     {% if error_name %}
                                         <div class="text-danger">{{ error_name }}</div>
                                     {% endif %}
@@ -134,7 +136,8 @@
                                                         {% for field in form[language.language_id] %}
                                                             <tr id="form-fields-row-{{ form_row }}">
                                                                 <td class="text-left">
-                                                                    <input type="text" name="form[{{ language.language_id }}][{{ form_row }}][name]" value="{{ field.name }}" placeholder="{{ column_name }}" class="form-control" />
+                                                                    <input type="text" name="form[{{ language.language_id }}][{{ form_row }}][name]" id="input-form-{{ language.language_id }}-{{ field.field_name }}-name" value="{{ field.name }}" placeholder="{{ column_name }}" class="form-control" />
+                                                                    <div id="error-form-{{ language.language_id }}-{{ field.field_name }}-name" class="invalid-feedback"></div>
 
                                                                     {% if error_form[language.language_id][field.field_name]['name'] %}
                                                                         <div class="text-danger">{{ error_form[language.language_id][field.field_name]['name'] }}</div>
@@ -142,7 +145,7 @@
                                                                 </td>
 
                                                                 <td class="text-left">
-                                                                    <select name="form[{{ language.language_id }}][{{ form_row }}][type]" class="form-select">
+                                                                    <select name="form[{{ language.language_id }}][{{ form_row }}][type]" id="input-form-{{ language.language_id }}-{{ field.field_name }}-type" class="form-select">
                                                                         <option value="">{{ text_select }}</option>
 
                                                                         <optgroup label="{{ text_group_basic }}">
@@ -167,6 +170,7 @@
                                                                             <option value="time"{% if field.type == 'time' %}{{ ' selected' }}{% endif %}>{{ text_type_time }}</option>
                                                                         </optgroup>
                                                                     </select>
+                                                                    <div id="error-form-{{ language.language_id }}-{{ field.field_name }}-type" class="invalid-feedback"></div>
 
                                                                     {% if error_form[language.language_id][field.field_name]['type'] %}
                                                                         <div class="text-danger">{{ error_form[language.language_id][field.field_name]['type'] }}</div>
@@ -223,15 +227,12 @@
                             <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label" for="input-status">{{ entry_status }}</label>
                                 <div class="col-sm-10">
-                                    <select name="status" id="input-status" class="form-select">
-                                        {% if status %}
-                                            <option value="1" selected="selected">{{ text_enabled }}</option>
-                                            <option value="0">{{ text_disabled }}</option>
-                                        {% else %}
-                                            <option value="1">{{ text_enabled }}</option>
-                                            <option value="0" selected="selected">{{ text_disabled }}</option>
-                                        {% endif %}
-                                    </select>
+                                    <div class="input-group">
+                                        <div class="form-check form-switch form-switch-lg">
+                                            <input type="hidden" name="status" value="0" class="hidden"/>
+                                            <input type="checkbox" name="status" value="1" id="input-status" class="form-check-input"{% if status %} checked{% endif %}/>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -262,13 +263,15 @@
         var form_row = {{ form_row }};
 
         function addField(language_id) {
+            var uniqID = uniqid();
+
             html  = '<tr id="form-fields-row-' + form_row + '">';
-                html += '<td class="text-left"><input type="text" name="form[' + language_id + '][' + form_row + '][name]" value="" placeholder="{{ column_title }}" class="form-control" /></td>';
-                html += '<td class="text-left"><select name="form[' + language_id + '][' + form_row + '][type]" class="form-select"><option value="">{{ text_select }}</option><optgroup label="{{ text_group_basic }}"><option value="text">{{ text_type_text }}</option><option value="textarea">{{ text_type_textarea }}</option></optgroup><optgroup label="{{ text_group_contact }}"><option value="email">{{ text_type_email }}</option><option value="tel">{{ text_type_tel }}</option></optgroup><optgroup label="{{ text_group_choose }}"><option value="select">{{ text_type_select }}</option><option value="checkbox">{{ text_type_checkbox }}</option><option value="radio">{{ text_type_radio }}</option></optgroup><optgroup label="{{ text_group_datetme }}"><option value="datetime">{{ text_type_datetime }}</option><option value="date">{{ text_type_date }}</option><option value="time">{{ text_type_time }}</option></optgroup></select></td>';
+                html += '<td class="text-left"><input type="text" name="form[' + language_id + '][' + form_row + '][name]" id="input-form-' + language_id + '-' + uniqID + '' + form_row + '-name" value="" placeholder="{{ column_title }}" class="form-control" /><div id="error-form-' + language_id + '-' + uniqID + '' + form_row + '-name" class="invalid-feedback"></div></td>';
+                html += '<td class="text-left"><select name="form[' + language_id + '][' + form_row + '][type]" id="input-form-' + language_id + '-' + uniqID + '' + form_row + '-type" class="form-select"><option value="">{{ text_select }}</option><optgroup label="{{ text_group_basic }}"><option value="text">{{ text_type_text }}</option><option value="textarea">{{ text_type_textarea }}</option></optgroup><optgroup label="{{ text_group_contact }}"><option value="email">{{ text_type_email }}</option><option value="tel">{{ text_type_tel }}</option></optgroup><optgroup label="{{ text_group_choose }}"><option value="select">{{ text_type_select }}</option><option value="checkbox">{{ text_type_checkbox }}</option><option value="radio">{{ text_type_radio }}</option></optgroup><optgroup label="{{ text_group_datetme }}"><option value="datetime">{{ text_type_datetime }}</option><option value="date">{{ text_type_date }}</option><option value="time">{{ text_type_time }}</option></optgroup></select><div id="error-form-' + language_id + '-' + uniqID + '' + form_row + '-type" class="invalid-feedback"></div></td>';
                 html += '<td class="text-left"><textarea name="form[' + language_id + '][' + form_row + '][select_options]" rows="5" placeholder="{{ column_select_opt }}" class="form-control"></textarea></td>';
                 html += '<td class="text-left"><select name="form[' + language_id + '][' + form_row + '][required]" class="form-select"><option value="1">{{ text_yes }}</option><option value="0" selected="selected">{{ text_no }}</option></select></td>';
                 html += '<td class="text-left"><input type="number" min="0" step="1" name="form[' + language_id + '][' + form_row + '][sort_order]" value="" placeholder="{{ column_sort_order }}" class="form-control" /></td>';
-                html += '<td class="text-center"><input type="hidden" name="form[' + language_id + '][' + form_row + '][field_name]" value="' + uniqid() + '' + form_row + '" /><button type="button" onclick="$(\'#form-fields-row-' + form_row  + ', .tooltip\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+                html += '<td class="text-center"><input type="hidden" name="form[' + language_id + '][' + form_row + '][field_name]" value="' + uniqID + '' + form_row + '" /><button type="button" onclick="$(\'#form-fields-row-' + form_row  + ', .tooltip\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
             html += '</tr>';
 
             $('#form-fields-' + language_id + ' tbody').append(html);

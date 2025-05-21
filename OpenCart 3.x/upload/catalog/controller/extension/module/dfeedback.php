@@ -12,20 +12,23 @@ class ControllerExtensionModuleDFeedback extends Controller {
     private $datetimepicker = false;
 
     public function index($setting) {
-        if (isset($setting['form'][$this->config->get('config_language_id')])) {
+        $view = '';
+        $language_id = $this->config->get('config_language_id');
+
+        if (isset($setting['form'][$language_id])) {
             $this->load->language('extension/module/dfeedback');
 
             if ($this->request->server['HTTPS']) {
-                $http_server = HTTPS_SERVER;
+                $HTTP_SERVER = HTTPS_SERVER;
             } else {
-                $http_server = HTTP_SERVER;
+                $HTTP_SERVER = HTTP_SERVER;
             }
 
-            $this->document->addStyle($http_server . 'catalog/view/javascript/module-dfeedback/dfeedback.css');
+            $this->document->addStyle($HTTP_SERVER . 'catalog/view/javascript/module-dfeedback/dfeedback.css');
 
             static $module = 0;
 
-            $data['form'] = $setting['form'][$this->config->get('config_language_id')];
+            $data['form'] = $setting['form'][$language_id];
 
             usort($data['form'], function($a, $b){
                 return strcmp($a['sort_order'], $b['sort_order']);
@@ -36,12 +39,12 @@ class ControllerExtensionModuleDFeedback extends Controller {
 
             // Add Datetimepicker Script.
             if ($data['datetimepicker'] = $this->datetimepicker) {
-                $this->document->addStyle($http_server . 'catalog/view/javascript/module-dfeedback/datetimepicker-1.3.6/jquery.datetimepicker.min.css');
-                $this->document->addScript($http_server . 'catalog/view/javascript/module-dfeedback/datetimepicker-1.3.6/jquery.datetimepicker.full.min.js');
+                $this->document->addStyle($HTTP_SERVER . 'catalog/view/javascript/module-dfeedback/datetimepicker-1.3.6/jquery.datetimepicker.min.css');
+                $this->document->addScript($HTTP_SERVER . 'catalog/view/javascript/module-dfeedback/datetimepicker-1.3.6/jquery.datetimepicker.full.min.js');
             }
 
-            $data['heading_title'] = html_entity_decode($setting['module_description'][$this->config->get('config_language_id')]['title'], ENT_QUOTES, 'UTF-8');
-            $data['description'] = html_entity_decode($setting['module_description'][$this->config->get('config_language_id')]['description'], ENT_QUOTES, 'UTF-8');
+            $data['heading_title'] = html_entity_decode($setting['module_description'][$language_id]['title'], ENT_QUOTES, 'UTF-8');
+            $data['description'] = html_entity_decode($setting['module_description'][$language_id]['description'], ENT_QUOTES, 'UTF-8');
             $data['attr_ID'] = $setting['attr_ID'];
 
             // Captcha
@@ -55,22 +58,29 @@ class ControllerExtensionModuleDFeedback extends Controller {
                 }
             }
 
-            $data['fcode'] = openssl_encrypt($setting['uniqid'] . '---' . $setting['module_id'] . '---' . $setting['mcode'] . '---' . $this->config->get('module_dfeedback_captcha_ed_ec'), 'AES-128-ECB', $this->config->get('module_dfeedback_captcha_ed_pc'));
+            $fcode  = '';
+            $fcode .= $setting['uniqid'] . '---';
+            $fcode .= $setting['module_id'] . '---';
+            $fcode .= $setting['mcode'] . '---';
+            $fcode .= $this->config->get('module_dfeedback_captcha_ed_ec');
+
+            $data['fcode'] = openssl_encrypt($fcode, 'AES-128-ECB', $this->config->get('module_dfeedback_captcha_ed_pc'));
 
             $data['action'] = $this->url->link('extension/module/dfeedback/submit', '', true);
 
             $data['module'] = $module++;
 
-            return $this->load->view('extension/module/dfeedback', $data);
-        } else {
-            return '';
+            $view = $this->load->view('extension/module/dfeedback', $data);
         }
+
+        return $view;
     }
 
     /**
-     * Submit Form. AJAX.
+     * Submit Form.
+     * AJAX.
      * 
-     * @return array $json
+     * @return void
      */
     public function submit() {
         $this->load->language('extension/module/dfeedback');
@@ -78,6 +88,8 @@ class ControllerExtensionModuleDFeedback extends Controller {
         $this->load->model('setting/module');
 
         $json = array();
+        $json['success'] = false;
+        $json['error']['general'] = $this->language->get('error_uniqid');
 
         if (isset($this->request->post['fcode'])) {
             $fcode = openssl_decrypt($this->request->post['fcode'], 'AES-128-ECB', $this->config->get('module_dfeedback_captcha_ed_pc'));
@@ -98,32 +110,30 @@ class ControllerExtensionModuleDFeedback extends Controller {
                 if (count($uniq_keys) == 4) {
                     $setting = $this->model_setting_module->getModule((int)$uniq_keys[1]);
 
-                    if (!empty($setting) && isset($setting['uniqid']) && ($setting['uniqid'] == $uniq_keys[0]) && isset($setting['mcode']) && ($setting['mcode'] == $uniq_keys[2]) && ($uniq_keys[3] == $this->config->get('module_dfeedback_captcha_ed_ec'))) {
-                        if ($this->validate($fields, $setting)) {
-                            $this->sendMail($fields, $setting);
+                    if (!empty($setting) && isset($setting['uniqid']) && 
+                        ($setting['uniqid'] == $uniq_keys[0]) && 
+                        isset($setting['mcode']) && ($setting['mcode'] == $uniq_keys[2]) && 
+                        ($uniq_keys[3] == $this->config->get('module_dfeedback_captcha_ed_ec'))) {
+                            if ($this->validate($fields, $setting)) {
+                                $this->sendMail($fields, $setting);
 
-                            $json['success'] = true;
-                            $json['text_success'] = $this->language->get('text_success');
-                        } else {
-                            $json['success'] = false;
-                            $json['error'] = $this->error;
-                            $json['error']['general'] = $this->language->get('error_fields');
-                        }
-                    } else {
-                        $json['success'] = false;
-                        $json['error']['general'] = $this->language->get('error_uniqid');
+                                $json['success'] = true;
+                                $json['text_success'] = $this->language->get('text_success');
+                            } else {
+                                $json['error'] = $this->error;
+
+                                if (isset($json['error']['form']['fields'])) {
+                                    $json['error']['fields'] = $this->language->get('error_fields');
+                                }
+                            }
+
+                            $json['error']['general'] = '';
                     }
-                } else {
-                    $json['success'] = false;
-                    $json['error']['general'] = $this->language->get('error_uniqid');
                 }
             } else {
-                $json['success'] = false;
-                $json['error']['general'] = $this->language->get('error_data');
+                $json['error']['general'] = '';
+                $json['error']['fields'] = $this->language->get('error_fields');
             }
-        } else {
-            $json['success'] = false;
-            $json['error']['general'] = $this->language->get('error_uniqid');
         }
 
         $this->response->addHeader('Content-Type: application/json');
@@ -221,9 +231,11 @@ class ControllerExtensionModuleDFeedback extends Controller {
      * @return string $html
      */
     private function htmlMail($fields, $setting) {
+        $language_id = $this->config->get('config_language_id');
+
         $html = '<div>';
 
-        foreach($setting['form'][$this->config->get('config_language_id')] as $field_setting) {
+        foreach($setting['form'][$language_id] as $field_setting) {
             foreach($fields as $key_post => $field_post) {
                 if ($field_setting['field_name'] == $key_post) {
                     switch ($field_setting['type']) {
@@ -271,12 +283,15 @@ class ControllerExtensionModuleDFeedback extends Controller {
      * @param array $fields
      * @param array $setting
      * 
-     * @return bool $this->error
+     * @return bool
      */
     protected function validate($fields, $setting) {
-        foreach($setting['form'][$this->config->get('config_language_id')] as $field_setting) {
-            if ($field_setting['type'] == 'checkbox' && $field_setting['required'] && !isset($fields[$field_setting['field_name']])) {
-                $this->error['form']['fields'][$field_setting['field_name']] = $this->language->get('error_field');
+        $language_id = $this->config->get('config_language_id');
+
+        foreach($setting['form'][$language_id] as $field_setting) {
+            if (($field_setting['type'] == 'checkbox' || $field_setting['type'] == 'radio') && 
+                $field_setting['required'] && !isset($fields[$field_setting['field_name']])) {
+                    $this->error['form']['fields'][$field_setting['field_name']] = $this->language->get('error_field');
             } else {
                 foreach($fields as $key_post => $field_post) {
                     if ($field_setting['field_name'] == $key_post) {

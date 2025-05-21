@@ -84,6 +84,9 @@
     -webkit-transition: none;
     transition: none;
 }
+.module-dfeedback form .checkbox-single > * {
+    vertical-align: middle;
+}
 .module-dfeedback form .form-captcha {
     padding: 15px;
 }

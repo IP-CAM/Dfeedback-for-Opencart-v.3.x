@@ -41,7 +41,7 @@ $_['tab_settings']       = 'Налаштування';
 $_['column_name']        = 'Ім\'я поля';
 $_['column_type']        = 'Тип поля';
 $_['column_required']    = 'Обов\'язкове';
-$_['column_select_opt']  = 'Варіанти для типу поля «Вибір»';
+$_['column_select_opt']  = 'Варіанти для групи полів «Вибір»';
 $_['column_sort_order']  = 'Порядок сортування';
 
 // Entry

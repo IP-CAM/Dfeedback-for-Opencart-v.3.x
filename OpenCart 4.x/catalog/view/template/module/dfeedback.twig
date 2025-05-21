@@ -90,9 +90,9 @@
                                                 </div>
                                             {% endfor %}
                                         {% else %}
-                                            <label {% if field.required %}class="required"{% endif %}>
-                                                <input type="checkbox" name="fields[{{ field.field_name }}][]" value="{{ text_yes }}" class="dfeedback-field" style="vertical-align: middle;"{% if field.required %}{{ ' required' }}{% endif %}>
-                                                <span style="vertical-align: middle;">{{ field.name }}</span>
+                                            <label class="checkbox-single{% if field.required %} required{% endif %}">
+                                                <input type="checkbox" name="fields[{{ field.field_name }}][]" value="{{ text_yes }}" class="dfeedback-field"{% if field.required %}{{ ' required' }}{% endif %}>
+                                                <span>{{ field.name }}</span>
                                             </label>
                                         {% endif %}
                                     </div>
@@ -230,24 +230,26 @@
                     form.removeClass('loader');
                 },
                 success: function (json) {
-                    //console.log(json);
+                    console.log(json);
 
-                    if (json['error']) {
+                    if (json?.error) {
                         var errorGeneral = '<div class="field_error_general">';
 
-                        if (json['error']['form']['fields']) {
-                            errorGeneral += json['error']['general'];
+                        if (json.error?.general) errorGeneral += json['error']['general'];
 
+                        if (json.error?.fields) {
+                            if (json.error?.general) errorGeneral += '<br>';
+                            errorGeneral += json['error']['fields'];
+                        }
+
+                        if (json.error?.form?.fields) {
                             for (const key in json['error']['form']['fields']) {
                                 form.find('[name^="fields[' + key + ']"]').closest('.field-wrap').after('<div class="field_error">' + json['error']['form']['fields'][key] + '</div>');
                             }
                         }
 
-                        if (json['error']['form']['captcha']) {
-                            if (json['error']['form']['fields']) {
-                                errorGeneral += '<br>';
-                            }
-
+                        if (json.error?.form?.captcha) {
+                            if (json.error?.general || json.error?.fields) errorGeneral += '<br>';
                             errorGeneral += json['error']['form']['captcha'];
                         }
 

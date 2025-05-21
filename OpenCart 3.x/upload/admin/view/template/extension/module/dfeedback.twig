@@ -135,7 +135,7 @@
                                                     {% if form[language.language_id] %}
                                                         {% for field in form[language.language_id] %}
                                                             <tr id="form-fields-row-{{ form_row }}">
-                                                                <td class="text-left">
+                                                                <td class="text-left{% if error_form[language.language_id][field.field_name]['name'] %} has-error{% endif %}">
                                                                     <input type="text" name="form[{{ language.language_id }}][{{ form_row }}][name]" value="{{ field.name }}" placeholder="{{ column_name }}" class="form-control" />
 
                                                                     {% if error_form[language.language_id][field.field_name]['name'] %}
@@ -143,7 +143,7 @@
                                                                     {% endif %}
                                                                 </td>
 
-                                                                <td class="text-left">
+                                                                <td class="text-left{% if error_form[language.language_id][field.field_name]['type'] %} has-error{% endif %}">
                                                                     <select name="form[{{ language.language_id }}][{{ form_row }}][type]" class="form-control">
                                                                         <option value="">{{ text_select }}</option>
 

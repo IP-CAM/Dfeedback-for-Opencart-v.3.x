@@ -25,7 +25,7 @@ $_['text_type_text']     = 'Text';
 $_['text_type_textarea'] = 'Text area';
 $_['text_type_email']    = 'E-mail';
 $_['text_type_tel']      = 'Phone';
-$_['text_type_select']   = 'Choice (select)';
+$_['text_type_select']   = 'Select (select)';
 $_['text_type_checkbox'] = 'Checkbox (checkbox)';
 $_['text_type_radio']    = 'Switch (radio)';
 $_['text_type_datetime'] = 'Date & Time';
@@ -41,7 +41,7 @@ $_['tab_settings']       = 'Settings';
 $_['column_name']        = 'Field name';
 $_['column_type']        = 'Field type';
 $_['column_required']    = 'Required';
-$_['column_select_opt']  = 'Options for field type «Choice»';
+$_['column_select_opt']  = 'Options for fields group «Choice»';
 $_['column_sort_order']  = 'Sorting order';
 
 // Entry
@@ -62,6 +62,7 @@ $_['help_type_choise']   = 'Enter each choice on a new line.<br>For more control
 
 // Error
 $_['error_permission']   = 'You do not have enough rights to make changes!';
+$_['error_warning']      = 'Please check the form carefully for errors!';
 $_['error_name']         = 'Title must be between 3 and 64 characters!';
 $_['error_row_name']     = 'The field name must be between 3 and 64 characters!';
 $_['error_row_type']     = 'Field type not selected!';

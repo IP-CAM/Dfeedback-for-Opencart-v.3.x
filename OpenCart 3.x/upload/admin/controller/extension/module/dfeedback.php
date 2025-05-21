@@ -56,6 +56,12 @@ class ControllerExtensionModuleDFeedback extends Controller {
             $data['error_form'] = array();
         }
 
+        $url = '';
+
+        if (isset($this->request->get['module_id'])) {
+            $url .= '&module_id=' . $this->request->get['module_id'];
+        }
+
         $data['breadcrumbs'] = array();
 
         $data['breadcrumbs'][] = array(
@@ -68,27 +74,15 @@ class ControllerExtensionModuleDFeedback extends Controller {
             'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
         );
 
-        if (!isset($this->request->get['module_id'])) {
-            $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('heading_title'),
-                'href' => $this->url->link('extension/module/dfeedback', 'user_token=' . $this->session->data['user_token'], true)
-            );
-        } else {
-            $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('heading_title'),
-                'href' => $this->url->link('extension/module/dfeedback', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $this->request->get['module_id'], true)
-            );
-        }
+        $data['breadcrumbs'][] = array(
+            'text' => $this->language->get('heading_title'),
+            'href' => $this->url->link('extension/module/dfeedback', 'user_token=' . $this->session->data['user_token'] . $url, true)
+        );
 
-        if (!isset($this->request->get['module_id'])) {
-            $data['action'] = $this->url->link('extension/module/dfeedback', 'user_token=' . $this->session->data['user_token'], true);
-        } else {
-            $data['action'] = $this->url->link('extension/module/dfeedback', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $this->request->get['module_id'], true);
-        }
-
+        $data['action'] = $this->url->link('extension/module/dfeedback', 'user_token=' . $this->session->data['user_token'] . $url, true);
         $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
 
-        if (isset($this->request->get['module_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
+        if (isset($this->request->get['module_id'])) {
             $module_info = $this->model_setting_module->getModule($this->request->get['module_id']);
         }
 
@@ -251,6 +245,10 @@ class ControllerExtensionModuleDFeedback extends Controller {
             }
         }
 
+        if ($this->error && !isset($this->error['warning'])) {
+            $this->error['warning'] = $this->language->get('error_warning');
+        }
+
         return !$this->error;
     }
 
@@ -259,7 +257,7 @@ class ControllerExtensionModuleDFeedback extends Controller {
     *
     * @return void
     */
-    public function install(): void {
+    public function install() {
         $this->load->model('setting/setting');
 
         // Add settings.
@@ -274,7 +272,7 @@ class ControllerExtensionModuleDFeedback extends Controller {
     *
     * @return void
     */
-    public function uninstall(): void {
+    public function uninstall() {
         $this->load->model('setting/setting');
         $this->model_setting_setting->deleteSetting('module_dfeedback');
     }
@@ -284,17 +282,17 @@ class ControllerExtensionModuleDFeedback extends Controller {
     *
     * @param int $length
     *
-    * @return string $random_string
+    * @return string $string
     */
-    function generateRandomString($length = 16): string {
+    private function generateRandomString($length = 16) {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $characters_length = strlen($characters);
-        $random_string = '';
+        $string = '';
 
         for ($i = 0; $i < $length; $i++) {
-            $random_string .= $characters[random_int(0, $characters_length - 1)];
+            $string .= $characters[random_int(0, $characters_length - 1)];
         }
 
-        return $random_string;
+        return $string;
     }
 }
